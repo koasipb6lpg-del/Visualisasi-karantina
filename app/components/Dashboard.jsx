@@ -671,7 +671,7 @@ export default function Dashboard({
         <div className="w-full max-w-3xl mt-12 mb-12 flex flex-col space-y-6">
 
           <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSc7bOBkMP_nxdE1u2AtoDxEBiV3sUz3WBbX4xsnzxk8Lfy8Mw/viewform"
+            href="https://forms.gle/6mSpc94s1H5MCG7o8"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full bg-[#0d1b3e] hover:bg-opacity-90 text-white font-medium py-4 px-4 shadow transition duration-200 text-sm tracking-wide rounded-xl text-center"
@@ -680,7 +680,7 @@ export default function Dashboard({
           </a>
 
           <a
-            href="https://docs.google.com/spreadsheets/d/1DVG_ltcc7VWxvj8PtsfAsrYk-w6usXvcc_otH1P9134/edit?usp=sharing"
+            href="https://docs.google.com/spreadsheets/d/1_qjKWUiN4PTgoCzj6A3VEdXIjNjv10FTEBW4Gs2PIAA/edit?gid=1635034958#gid=1635034958"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full bg-[#0d1b3e] hover:bg-opacity-90 text-white font-medium py-4 px-4 shadow transition duration-200 text-sm tracking-wide rounded-xl text-center"
