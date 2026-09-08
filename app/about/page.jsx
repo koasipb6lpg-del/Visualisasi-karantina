@@ -69,7 +69,7 @@ export default function AboutPage() {
       <main className="mx-auto max-w-5xl px-5 py-8 md:px-8 md:py-10">
         <section className="mx-auto max-w-3xl text-sm leading-7 text-gray-800">
           <p className="mb-4 text-[#182b69]">Halo!</p>
-          <p>Lima mahasiswa yang sedang menjalani Stase Koasistensi Karantina Balai Karantina Hewan, Ikan, dan Tumbuhan Lampung mencoba merancang <em>website</em> untuk memfasilitasi akses informasi mengenai kapal angkut ternak dan petugas karantina di lapangan. Semoga <em>website</em> ini dapat bermanfaat dan membawa perubahan berarti.</p>
+          <p>Enam mahasiswa yang sedang menjalani Stase Koasistensi Karantina Balai Karantina Hewan, Ikan, dan Tumbuhan Lampung mencoba merancang <em>website</em> untuk memfasilitasi akses informasi mengenai kapal angkut ternak dan petugas karantina di lapangan. Semoga <em>website</em> ini dapat bermanfaat dan membawa perubahan berarti.</p>
           <p className="mt-4 text-[#182b69]">Salam kenal!</p>
         </section>
         <section className="mt-12 border-t border-gray-300 pt-8">
