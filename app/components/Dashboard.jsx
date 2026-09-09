@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import DatePickerModal from './DatePickerModal';
@@ -111,6 +111,8 @@ function hasValue(value) {
   return String(value ?? '').trim() !== '';
 }
 
+const DETAIL_ITEMS_PER_PAGE = 15;
+
 export default function Dashboard({
   summary,
   data,
@@ -122,6 +124,11 @@ export default function Dashboard({
   // Rentang tanggal dari DatePickerModal
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [detailPage, setDetailPage] = useState(1);
+
+  useEffect(() => {
+    setDetailPage(1);
+  }, [startDate, endDate]);
 
   /*
    * =============================================================
@@ -243,6 +250,24 @@ export default function Dashboard({
       latestRow?.row['Petugas Pemeriksa Kapal'],
     ].filter(Boolean);
   }, [filteredData]);
+
+  const detailRows = useMemo(() => {
+    return filteredData.filter((row) => Object.entries(row).some(
+      ([key, value]) =>
+        key !== 'tanggalFormatted' &&
+        key !== 'jumlahSapiFormatted' &&
+        hasValue(value)
+    ));
+  }, [filteredData]);
+
+  const detailTotalPages = Math.ceil(
+    detailRows.length / DETAIL_ITEMS_PER_PAGE
+  );
+
+  const paginatedDetailRows = detailRows.slice(
+    (detailPage - 1) * DETAIL_ITEMS_PER_PAGE,
+    detailPage * DETAIL_ITEMS_PER_PAGE
+  );
 
   return (
     <>
@@ -666,7 +691,7 @@ export default function Dashboard({
                     </thead>
 
                     <tbody className="bg-white divide-y divide-gray-100">
-                      {filteredData.length === 0 ? (
+                      {detailRows.length === 0 ? (
                         <tr>
                           <td
                             colSpan={9}
@@ -676,14 +701,7 @@ export default function Dashboard({
                           </td>
                         </tr>
                       ) : (
-                        filteredData
-                          .filter((row) => Object.entries(row).some(
-                            ([key, value]) =>
-                              key !== 'tanggalFormatted' &&
-                              key !== 'jumlahSapiFormatted' &&
-                              hasValue(value)
-                          ))
-                          .map((row, i) => (
+                        paginatedDetailRows.map((row, i) => (
                           <tr key={i}>
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-600">
                               {hasValue(getCellValue(row, 'Timestamp'))
@@ -733,6 +751,34 @@ export default function Dashboard({
                     </tbody>
                   </table>
                 </div>
+
+                {detailTotalPages > 1 && (
+                  <div className="flex items-center justify-between gap-4 mt-4 text-xs text-gray-600">
+                    <span>
+                      Halaman {detailPage} dari {detailTotalPages}
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setDetailPage((page) => page - 1)}
+                        disabled={detailPage === 1}
+                        className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                      >
+                        Sebelumnya
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setDetailPage((page) => page + 1)}
+                        disabled={detailPage === detailTotalPages}
+                        className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                      >
+                        Berikutnya
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </section>
           </div>
