@@ -9,6 +9,8 @@ import {
 } from '@/lib/googleSheets';
 import Dashboard from './components/Dashboard';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Halaman utama SI BOS Q.
  *
