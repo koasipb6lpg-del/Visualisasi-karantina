@@ -133,22 +133,37 @@ export default function Dashboard({
    * Jika belum dipilih, tampilkan seluruh data.
    */
   const filteredData = useMemo(() => {
-    if (!startDate || !endDate) {
-      return data;
+    let rows = data;
+
+    if (startDate && endDate) {
+      const startKey = getDateKey(startDate);
+      const endKey = getDateKey(endDate);
+
+      if (startKey && endKey) {
+        rows = data.filter((row) => {
+          const rowDate = getDateKey(row['Timestamp']);
+          if (!rowDate) return false;
+          return rowDate >= startKey && rowDate <= endKey;
+        });
+      }
     }
 
-    const startKey = getDateKey(startDate);
-    const endKey = getDateKey(endDate);
+    return rows
+      .map((row, index) => ({
+        row,
+        index,
+        timestamp: getTimestampValue(row['Timestamp']),
+      }))
+      .sort((a, b) => {
+        const aInvalid = Number.isNaN(a.timestamp);
+        const bInvalid = Number.isNaN(b.timestamp);
 
-    if (!startKey || !endKey) {
-      return data;
-    }
-
-    return data.filter((row) => {
-      const rowDate = getDateKey(row['Timestamp']);
-      if (!rowDate) return false;
-      return rowDate >= startKey && rowDate <= endKey;
-    });
+        if (aInvalid && bInvalid) return a.index - b.index;
+        if (aInvalid) return 1;
+        if (bInvalid) return -1;
+        return a.timestamp - b.timestamp;
+      })
+      .map(({ row }) => row);
   }, [data, startDate, endDate]);
 
   /*
