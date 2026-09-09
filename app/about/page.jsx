@@ -85,7 +85,7 @@ export default function AboutPage() {
                   </div>
                   <h3 className="mt-3 text-sm font-medium text-[#182b69]">{student.name}</h3>
                   <p className="mt-1 text-xs text-gray-500">{student.nim}</p>
-                </article>
+                </article> 
               );
             })}
           </div>

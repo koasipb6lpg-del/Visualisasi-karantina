@@ -43,6 +43,28 @@ function getDateKey(value) {
   return null;
 }
 
+function getTimestampValue(value) {
+  if (!value) return NaN;
+
+  const text = String(value).trim();
+  const slashMatch = text.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/
+  );
+
+  if (slashMatch) {
+    return new Date(
+      Number(slashMatch[3]),
+      Number(slashMatch[2]) - 1,
+      Number(slashMatch[1]),
+      Number(slashMatch[4] || 0),
+      Number(slashMatch[5] || 0),
+      Number(slashMatch[6] || 0)
+    ).getTime();
+  }
+
+  return new Date(value).getTime();
+}
+
 function formatDateIndonesia(dateKey) {
   if (!dateKey) return '';
 
@@ -63,6 +85,30 @@ function formatDateIndonesia(dateKey) {
 
 function formatNumberID(number) {
   return new Intl.NumberFormat('id-ID').format(number);
+}
+
+function getCellValue(row, columnName) {
+  if (row[columnName] !== undefined) return row[columnName];
+
+  const normalize = (value) =>
+    String(value ?? '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+
+  const target = normalize(columnName);
+  const entry = Object.entries(row).find(([key]) => {
+    const normalizedKey = normalize(key);
+    return normalizedKey === target || (
+      target.includes('disinfeksialatangkut') &&
+      normalizedKey.includes('disinfeksialatangkut')
+    );
+  });
+
+  return entry?.[1] ?? '';
+}
+
+function hasValue(value) {
+  return String(value ?? '').trim() !== '';
 }
 
 export default function Dashboard({
@@ -143,31 +189,22 @@ export default function Dashboard({
    * =============================================================
    */
   const filteredPerusahaan = useMemo(() => {
-    const map = {};
+    return filteredData
+      .filter((row) => hasValue(getCellValue(row, 'Nama Perusahaan')))
+      .map((row) => {
+        const jumlah = getCellValue(row, 'Jumlah Sapi');
+        const total = parseInt(
+          String(jumlah ?? '').replace(/[.,]/g, ''),
+          10
+        );
 
-    filteredData.forEach((row) => {
-      const nama = row['Nama Perusahaan'];
-
-      if (!nama) return;
-
-      const jumlah = parseInt(
-        String(row['Jumlah Sapi'] ?? '0').replace(
-          /[.,]/g,
-          ''
-        ),
-        10
-      ) || 0;
-
-      map[nama] = (map[nama] || 0) + jumlah;
-    });
-
-    return Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .map(([nama, total]) => ({
-        nama,
-        total,
-        totalFormatted: formatNumberID(total),
-      }));
+        return {
+          nama: getCellValue(row, 'Nama Perusahaan'),
+          totalFormatted: hasValue(jumlah) && !Number.isNaN(total)
+            ? formatNumberID(total)
+            : '',
+        };
+      });
   }, [filteredData]);
 
   /*
@@ -176,16 +213,20 @@ export default function Dashboard({
    * =============================================================
    */
   const filteredPetugas = useMemo(() => {
+    const latestRow = filteredData.reduce((latest, row) => {
+      const rowTimestamp = getTimestampValue(row['Timestamp']);
+
+      if (Number.isNaN(rowTimestamp)) return latest;
+      if (!latest || rowTimestamp > latest.timestamp) {
+        return { row, timestamp: rowTimestamp };
+      }
+
+      return latest;
+    }, null);
+
     return [
-      ...new Set(
-        filteredData
-          .map(
-            (row) =>
-              row['Petugas Pemeriksa Kapal']
-          )
-          .filter(Boolean)
-      ),
-    ];
+      latestRow?.row['Petugas Pemeriksa Kapal'],
+    ].filter(Boolean);
   }, [filteredData]);
 
   return (
@@ -440,7 +481,7 @@ export default function Dashboard({
                     Informasi Kapal
                   </h4>
 
-                  <div className="overflow-hidden border border-gray-200 rounded">
+                  <div className="max-h-52 overflow-y-auto border border-gray-200 rounded">
                     <table className="w-full text-xs text-left">
                       <thead className="bg-[#0d1b3e] text-white">
                         <tr>
@@ -465,17 +506,22 @@ export default function Dashboard({
                             </td>
                           </tr>
                         ) : (
-                          filteredData.map((row, i) => (
+                          filteredData
+                            .filter((row) =>
+                              hasValue(getCellValue(row, 'Nama Kapal')) ||
+                              hasValue(getCellValue(row, 'Nama Port'))
+                            )
+                            .map((row, i) => (
                             <tr key={i}>
                               <td className="px-3 py-2 border-r border-gray-100 text-gray-800 font-medium">
-                                {row['Nama Kapal'] || '-'}
+                                {getCellValue(row, 'Nama Kapal')}
                               </td>
 
                               <td className="px-3 py-2 text-center text-gray-600">
-                                {row['Nama Port'] || '-'}
+                                {getCellValue(row, 'Nama Port')}
                               </td>
                             </tr>
-                          ))
+                            ))
                         )}
                       </tbody>
                     </table>
@@ -505,7 +551,7 @@ export default function Dashboard({
                     Informasi Perusahaan Importir
                   </h4>
 
-                  <div className="overflow-hidden border border-gray-200 rounded">
+                  <div className="max-h-52 overflow-y-auto border border-gray-200 rounded">
                     <table className="w-full text-xs text-left">
                       <thead className="bg-[#0d1b3e] text-white">
                         <tr>
@@ -615,47 +661,59 @@ export default function Dashboard({
                           </td>
                         </tr>
                       ) : (
-                        filteredData.map((row, i) => (
+                        filteredData
+                          .filter((row) => Object.entries(row).some(
+                            ([key, value]) =>
+                              key !== 'tanggalFormatted' &&
+                              key !== 'jumlahSapiFormatted' &&
+                              hasValue(value)
+                          ))
+                          .map((row, i) => (
                           <tr key={i}>
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-600">
-                              {row.tanggalFormatted}
+                              {hasValue(getCellValue(row, 'Timestamp'))
+                                ? row.tanggalFormatted
+                                : ''}
                             </td>
 
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-800 font-medium">
-                              {row['Nama Kapal'] || '-'}
+                              {getCellValue(row, 'Nama Kapal')}
                             </td>
 
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-600">
-                              {row['Nama Port'] || '-'}
+                              {getCellValue(row, 'Nama Port')}
                             </td>
 
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-600">
-                              {row['Nama Perusahaan'] || '-'}
+                              {getCellValue(row, 'Nama Perusahaan')}
                             </td>
 
                             <td className="px-3 py-2 border-r border-gray-100 text-center font-bold text-gray-800">
-                              {row.jumlahSapiFormatted}
+                              {hasValue(getCellValue(row, 'Jumlah Sapi'))
+                                ? row.jumlahSapiFormatted
+                                : ''}
                             </td>
 
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-600">
-                              {row['Petugas Pemeriksa Kapal'] || '-'}
+                              {getCellValue(row, 'Petugas Pemeriksa Kapal')}
                             </td>
 
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-600">
-                              {row['Jenis Hewan'] || '-'}
+                              {getCellValue(row, 'Jenis Hewan')}
                             </td>
 
                             <td className="px-3 py-2 border-r border-gray-100 text-gray-600">
-                              {row['Nopol Kendaraan'] || '-'}
+                              {getCellValue(row, 'Nopol Kendaraan')}
                             </td>
 
                             <td className="px-3 py-2 text-center text-gray-600">
-                              {row[
+                              {getCellValue(
+                                row,
                                 'Dilakukan Disinfeksi Alat Angkut?'
-                              ] || '-'}
+                              )}
                             </td>
                           </tr>
-                        ))
+                          ))
                       )}
                     </tbody>
                   </table>
