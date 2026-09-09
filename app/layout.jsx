@@ -14,6 +14,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "SI BOS Q - BKHIT Lampung",
   description: "Sistem Informasi Bongkar Sapi Karantina Lampung",
+  icons: {
+    icon: "/assets/img/Logo_Badan_Karantina_Indonesia.png",
+  },
 };
 
 export default function RootLayout({ children }) {
