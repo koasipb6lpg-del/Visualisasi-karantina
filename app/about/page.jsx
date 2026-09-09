@@ -65,7 +65,7 @@ export default function AboutPage() {
       <header className="relative flex h-64 items-center justify-center bg-cover bg-center text-white md:h-80" style={{ backgroundImage: 'linear-gradient(rgba(0,0,0,0.58), rgba(0,0,0,0.58)), url("/assets/img/Background.jpg")' }}>
         <SiteNavigation />
         <h1 className="mt-8 text-4xl font-bold italic tracking-tight md:text-5xl">ABOUT US</h1>
-      </header>
+      </header> 
       <main className="mx-auto max-w-5xl px-5 py-8 md:px-8 md:py-10">
         <section className="mx-auto max-w-3xl text-sm leading-7 text-gray-800">
           <p className="mb-4 text-[#182b69]">Halo!</p>
