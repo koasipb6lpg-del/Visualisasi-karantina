@@ -44,7 +44,7 @@ function SiteNavigation() {
 function SiteFooter() {
   return (
     <footer className="pb-10 pt-4 text-center">
-      <p className="mb-5 text-sm text-gray-700">Karantina KUAT untuk Indonesia Hebat!</p>
+      <p className="mb-5 text-sm text-gray-700">Karantina KUAT untuk Indonesia Hebat!!</p>
       <div className="flex justify-center gap-4">
         <a href="https://karantinaindonesia.go.id/" target="_blank" rel="noopener noreferrer" aria-label="Website Badan Karantina Indonesia"><Image src="/assets/img/Logo_Badan_Karantina_Indonesia.png" alt="Badan Karantina Indonesia" width={32} height={32} className="object-contain" /></a>
         <a href="https://www.instagram.com/karantinalampung?igsi=MWh3bHVkYnp5emprNQ==" target="_blank" rel="noopener noreferrer" aria-label="Instagram Karantina Lampung"><Image src="/assets/img/instagram.png" alt="Instagram" width={32} height={32} className="object-contain" /></a>
